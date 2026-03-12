@@ -58,7 +58,7 @@ def delete_user(db: Session, user: User) -> None:
 def seed_admin(db: Session) -> None:
     if not get_user_by_username(db, "admin"):
         create_user(db, UserCreate(
-            email="admin@fixflow.local",
+            email="admin@fixflow.com",
             username="admin",
             password="admin123",
             full_name="System Administrator",
