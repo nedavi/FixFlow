@@ -15,6 +15,12 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 def setup_db():
     import app.models  # noqa
     Base.metadata.create_all(bind=engine)
+    db = TestingSessionLocal()
+    try:
+        from app.services.users import seed_admin
+        seed_admin(db)
+    finally:
+        db.close()
     yield
     Base.metadata.drop_all(bind=engine)
 

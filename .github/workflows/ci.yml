@@ -18,12 +18,19 @@ jobs:
       run:
         working-directory: backend
 
+    env:
+      DATABASE_URL: sqlite:///./test_fixflow.db
+      SECRET_KEY: test-secret-key-for-ci
+      ENVIRONMENT: test
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
 
       - name: Install dependencies
         run: pip install -r requirements.txt

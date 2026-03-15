@@ -26,11 +26,7 @@ def get_requests(db: Session, current_user: User, skip: int = 0, limit: int = 10
     )
     if current_user.role == UserRole.client:
         q = q.filter(RepairRequest.created_by_id == current_user.id)
-    elif current_user.role == UserRole.technician:
-        q = q.filter(
-            (RepairRequest.assigned_to_id == current_user.id) |
-            (RepairRequest.created_by_id == current_user.id)
-        )
+    # admin, manager, technician — see all requests
     return q.order_by(RepairRequest.created_at.desc()).offset(skip).limit(limit).all()
 
 
