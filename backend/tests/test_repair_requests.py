@@ -1,10 +1,12 @@
+import uuid
 import pytest
 
 
 @pytest.fixture
 def equipment_id(client, admin_headers):
+    serial = f"SN-REQ-{uuid.uuid4().hex[:8].upper()}"
     r = client.post("/api/equipment/", json={
-        "name": "Printer HP", "serial_number": "SN-REQ-001",
+        "name": "Printer HP", "serial_number": serial,
         "equipment_type": "Printer", "location": "Office 2",
     }, headers=admin_headers)
     return r.json()["id"]
