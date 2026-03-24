@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
+
 from app.models.user import User, UserRole
-from app.schemas.user import UserCreate, UserUpdate, UserMeUpdate
+from app.schemas.user import UserCreate, UserMeUpdate, UserUpdate
 from app.services.auth import hash_password
 
 

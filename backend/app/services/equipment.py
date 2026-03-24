@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 from app.models.equipment import Equipment
 from app.schemas.equipment import EquipmentCreate, EquipmentUpdate
 

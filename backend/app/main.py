@@ -1,13 +1,15 @@
 import signal
 import sys
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import settings
-from app.database import engine, SessionLocal
-from app.logging_config import setup_logging, get_logger
+from app.database import SessionLocal, engine
+from app.logging_config import get_logger, setup_logging
 from app.middleware import RequestIDMiddleware
-from app.routers import auth, users, equipment, repair_requests
+from app.routers import auth, equipment, repair_requests, users
 
 setup_logging()
 logger = get_logger("fixflow.startup")
@@ -15,8 +17,8 @@ logger = get_logger("fixflow.startup")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from app.database import Base
     import app.models  # noqa: F401 — register all models with Base
+    from app.database import Base
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()

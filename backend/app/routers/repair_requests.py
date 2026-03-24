@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.dependencies import get_current_user, require_admin_or_manager
 from app.models.user import User, UserRole
-from app.schemas.repair_request import RepairRequestCreate, RepairRequestUpdate, RepairRequestResponse
-from app.services.repair_requests import get_request, get_requests, create_request, update_request, delete_request
+from app.schemas.repair_request import RepairRequestCreate, RepairRequestResponse, RepairRequestUpdate
 from app.services.equipment import get_equipment
+from app.services.repair_requests import create_request, delete_request, get_request, get_requests, update_request
 
 router = APIRouter(prefix="/api/requests", tags=["repair_requests"])
 

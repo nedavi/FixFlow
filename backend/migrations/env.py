@@ -1,7 +1,8 @@
 import os
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 config = context.config
 
@@ -14,8 +15,8 @@ if database_url:
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     config.set_main_option("sqlalchemy.url", database_url)
 
-from app.database import Base
-import app.models  # noqa: F401
+import app.models  # noqa: F401, E402
+from app.database import Base  # noqa: E402
 
 target_metadata = Base.metadata
 

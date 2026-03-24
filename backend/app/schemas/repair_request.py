@@ -1,8 +1,10 @@
 from datetime import datetime
+
 from pydantic import BaseModel
-from app.models.repair_request import RequestStatus, RequestPriority
-from app.schemas.user import UserResponse
+
+from app.models.repair_request import RequestPriority, RequestStatus
 from app.schemas.equipment import EquipmentResponse
+from app.schemas.user import UserResponse
 
 
 class RepairRequestCreate(BaseModel):

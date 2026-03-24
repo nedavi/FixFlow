@@ -1,10 +1,10 @@
-import uuid
 import time
+import uuid
+
 import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
-
 
 logger = structlog.get_logger("fixflow.http")
 

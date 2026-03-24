@@ -2,8 +2,8 @@
 Fuzzing-style tests: send random/malformed/boundary inputs to API endpoints
 and assert the app returns 4xx (not 500) and doesn't crash.
 """
-import string
 import random
+import string
 
 
 def _rand_str(length=50):

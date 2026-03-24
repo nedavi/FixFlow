@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.dependencies import get_current_user, require_admin_or_manager
-from app.schemas.equipment import EquipmentCreate, EquipmentUpdate, EquipmentResponse
+from app.schemas.equipment import EquipmentCreate, EquipmentResponse, EquipmentUpdate
 from app.services.equipment import (
-    get_equipment, get_all_equipment, create_equipment,
-    update_equipment, delete_equipment, get_equipment_by_serial,
+    create_equipment,
+    delete_equipment,
+    get_all_equipment,
+    get_equipment,
+    get_equipment_by_serial,
+    update_equipment,
 )
 
 router = APIRouter(prefix="/api/equipment", tags=["equipment"])
