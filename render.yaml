@@ -7,10 +7,13 @@ databases:
 services:
   - type: web
     name: fixflow-backend
-    runtime: python
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: >-
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -28,10 +31,10 @@ services:
   - type: web
     name: fixflow-frontend
     runtime: static
+    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    plan: free
+    staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
         value: https://fixflow-backend.onrender.com/api
