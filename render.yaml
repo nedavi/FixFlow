@@ -8,7 +8,6 @@ services:
   - type: web
     name: fixflow-backend
     runtime: docker
-    plan: free
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     dockerCommand: >-
@@ -31,7 +30,6 @@ services:
   - type: web
     name: fixflow-frontend
     runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
