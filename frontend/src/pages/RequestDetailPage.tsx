@@ -30,15 +30,19 @@ export default function RequestDetailPage() {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ status: '', assigned_to_id: '', notes: '' })
 
+  const canManage = user?.role === 'admin' || user?.role === 'manager'
+  const isTech = user?.role === 'technician'
+
   useEffect(() => {
-    Promise.all([getRequestById(Number(id)), getUsers()])
+    const usersPromise = canManage ? getUsers() : Promise.resolve([] as User[])
+    Promise.all([getRequestById(Number(id)), usersPromise])
       .then(([r, u]) => {
         setReq(r)
         setUsers(u)
         setForm({ status: r.status, assigned_to_id: String(r.assigned_to_id ?? ''), notes: r.notes ?? '' })
       })
       .finally(() => setLoading(false))
-  }, [id])
+  }, [id, canManage])
 
   const handleSave = async () => {
     setSaving(true)
@@ -56,9 +60,6 @@ export default function RequestDetailPage() {
 
   if (loading) return <Box display="flex" justifyContent="center" mt={8}><CircularProgress /></Box>
   if (!req) return <Typography>Заявка не найдена</Typography>
-
-  const canManage = user?.role === 'admin' || user?.role === 'manager'
-  const isTech = user?.role === 'technician'
 
   return (
     <Box>
