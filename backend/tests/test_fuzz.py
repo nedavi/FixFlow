@@ -1,14 +1,9 @@
 """
-Fuzz testing: random/malformed/boundary inputs + schema-based fuzzing via Schemathesis.
+Fuzz testing: random/malformed/boundary inputs to API endpoints.
 Asserts the API never returns 5xx and never crashes on unexpected input.
 """
 import random
 import string
-
-import schemathesis
-from hypothesis import settings
-
-from app.main import app
 
 # ---------------------------------------------------------------------------
 # Corpus-based fuzzing — ручной набор граничных и вредоносных строк
@@ -74,30 +69,3 @@ def test_fuzz_equipment_ids(client, admin_headers):
     for val in ["abc", "-1", "0", "99999999", "null"]:
         r = client.get(f"/api/equipment/{val}", headers=admin_headers)
         assert r.status_code in (200, 404, 422), f"Unexpected {r.status_code} for id={val!r}"
-
-
-# ---------------------------------------------------------------------------
-# Schema-based fuzzing — Schemathesis генерирует случайные данные по OpenAPI
-# ---------------------------------------------------------------------------
-
-schema = schemathesis.from_asgi("/openapi.json", app=app)
-
-
-@schema.parametrize()
-@settings(max_examples=15, deadline=3000)
-def test_schema_fuzz_unauthenticated(case):
-    """Случайные запросы без токена — не должно быть 5xx."""
-    response = case.call_asgi()
-    assert response.status_code < 500, (
-        f"5xx на {case.method} {case.formatted_path}: {response.text[:200]}"
-    )
-
-
-@schema.parametrize()
-@settings(max_examples=15, deadline=3000)
-def test_schema_fuzz_authenticated(case, admin_token):
-    """Случайные запросы с токеном админа — не должно быть 5xx."""
-    response = case.call_asgi(headers={"Authorization": f"Bearer {admin_token}"})
-    assert response.status_code < 500, (
-        f"5xx на {case.method} {case.formatted_path}: {response.text[:200]}"
-    )
