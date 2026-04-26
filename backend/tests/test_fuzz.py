@@ -1,13 +1,6 @@
-"""
-Fuzz testing: random/malformed/boundary inputs to API endpoints.
-Asserts the API never returns 5xx and never crashes on unexpected input.
-"""
 import random
 import string
 
-# ---------------------------------------------------------------------------
-# Corpus-based fuzzing — ручной набор граничных и вредоносных строк
-# ---------------------------------------------------------------------------
 
 def _rand_str(length: int = 50) -> str:
     return "".join(random.choices(string.printable, k=length))
