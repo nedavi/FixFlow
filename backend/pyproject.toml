@@ -3,7 +3,4 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = [
-    "E501",   # line too long — enforced by line-length, not as error
-    "F401",   # unused imports handled with # noqa where intentional
-]
+ignore = ["E501", "F401"]
