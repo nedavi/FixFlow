@@ -23,8 +23,8 @@ async def lifespan(app: FastAPI):
 
     db = SessionLocal()
     try:
-        from app.services.users import seed_admin
-        seed_admin(db)
+        from app.services.users import seed_demo_data
+        seed_demo_data(db)
         logger.info("startup_complete", environment=settings.environment)
     finally:
         db.close()

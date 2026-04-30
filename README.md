@@ -26,14 +26,101 @@ backend/app/
 └── main.py       # Точка входа, graceful shutdown
 ```
 
+## ER-диаграмма базы данных
+
+```mermaid
+erDiagram
+    users {
+        int id PK
+        string username
+        string email
+        string hashed_password
+        string full_name
+        enum role
+        bool is_active
+        datetime created_at
+    }
+    equipment {
+        int id PK
+        string name
+        string serial_number
+        string equipment_type
+        string location
+        enum status
+        text description
+        datetime created_at
+    }
+    repair_requests {
+        int id PK
+        string title
+        text description
+        enum status
+        enum priority
+        text notes
+        int equipment_id FK
+        int created_by_id FK
+        int assigned_to_id FK
+        datetime created_at
+        datetime completed_at
+    }
+
+    users ||--o{ repair_requests : "создаёт"
+    users ||--o{ repair_requests : "исполняет"
+    equipment ||--o{ repair_requests : "имеет"
+```
+
+## Диаграмма компонентов
+
+```mermaid
+graph TB
+    subgraph Client["Браузер"]
+        FE["React SPA\n(Vite + MUI)"]
+    end
+
+    subgraph Railway["Railway Cloud"]
+        direction TB
+        BE["FastAPI Backend\n(uvicorn)"]
+        DB["PostgreSQL 16"]
+        FE_SRV["nginx\n(static)"]
+    end
+
+    subgraph CI["GitHub Actions"]
+        LINT["Lint\n(ruff)"]
+        TEST["Test\n(pytest)"]
+        BUILD["Build\n(Docker → GHCR)"]
+        LINT --> TEST --> BUILD
+    end
+
+    FE -->|"HTTPS /api/*"| BE
+    BE -->|"SQLAlchemy"| DB
+    Client -->|"HTTPS"| FE_SRV
+    FE_SRV -->|"статика"| FE
+    BUILD -->|"Wait for CI"| Railway
+```
+
 ## Роли пользователей
 
 | Роль | Права |
 |------|-------|
 | `admin` | Полный доступ, управление пользователями |
 | `manager` | CRUD заявок и оборудования, назначение техников |
-| `technician` | Просмотр назначенных заявок, обновление статуса/примечаний |
+| `technician` | Просмотр всех заявок, обновление статуса/примечаний своих |
 | `client` | Создание заявок, просмотр своих заявок |
+
+## Тестовые данные (seed)
+
+При первом запуске автоматически создаются:
+
+| Логин | Пароль | Роль |
+|-------|--------|------|
+| `admin` | `admin123` | Администратор |
+| `manager1` | `manager123` | Менеджер |
+| `tech1` | `tech123` | Техник |
+| `tech2` | `tech123` | Техник |
+| `client1` | `client123` | Клиент |
+| `client2` | `client123` | Клиент |
+
+А также 5 единиц оборудования и 5 заявок с разными статусами.
 
 ## Быстрый старт (Docker)
 
@@ -45,29 +132,22 @@ docker compose up --build
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
 - Swagger UI: http://localhost:8000/docs
-- Демо-аккаунт: `admin` / `admin123`
 
 ## Локальная разработка (без Docker)
 
 ```bash
-# Backend
 cd backend
-python -m venv .venv && source .venv/bin/activate  # или .venv\Scripts\activate на Windows
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env  # настройте DATABASE_URL на SQLite
+cp .env.example .env
 uvicorn app.main:app --reload
 
-# Frontend
 cd frontend
 npm install
 npm run dev
 ```
 
 ## Переменные окружения
-
-Все настройки передаются через env vars (12-factor, фактор III). Смотри [`.env.example`](.env.example).
-
-Ключевые переменные:
 
 | Переменная | Описание | По умолчанию |
 |------------|----------|--------------|
@@ -88,27 +168,32 @@ pytest tests/ -v
 
 ## CI/CD (GitHub Actions)
 
-При пуше в `main` или `staging`:
-1. Запускаются тесты бэкенда
-2. Собираются Docker-образы, тегируются commit hash
-3. Образы пушатся в GitHub Container Registry (`ghcr.io/nedavi/`)
+При пуше в `main`:
+1. **Lint** — проверка кода (ruff)
+2. **Test** — запуск pytest
+3. **Build** — сборка Docker-образов → GHCR
+4. Railway автодеплоит после зелёного CI (Wait for CI)
 
 ## Структура проекта
 
 ```
 FixFlow/
-├── backend/              # FastAPI-приложение
+├── backend/
 │   ├── app/
-│   ├── migrations/       # Alembic-миграции
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   ├── routers/
+│   │   └── main.py
+│   ├── migrations/
 │   ├── tests/
 │   ├── Dockerfile
 │   └── requirements.txt
-├── frontend/             # React+TypeScript SPA
+├── frontend/
 │   ├── src/
 │   ├── Dockerfile
 │   └── nginx.conf
-├── .github/workflows/    # CI/CD
-├── docker-compose.yml    # Dev-окружение
-├── docker-compose.prod.yml  # Prod-окружение
+├── .github/workflows/
+├── docker-compose.yml
 └── .env.example
 ```
