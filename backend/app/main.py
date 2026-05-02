@@ -34,9 +34,34 @@ async def lifespan(app: FastAPI):
     logger.info("shutdown_complete")
 
 
+DESCRIPTION = """
+**FixFlow** — система управления заявками на ремонт оборудования.
+
+## Аутентификация
+Все защищённые эндпоинты требуют JWT Bearer токен.
+Получить токен: `POST /api/auth/login`.
+
+## Роли
+| Роль | Доступ |
+|------|--------|
+| `admin` | Полный доступ |
+| `manager` | CRUD заявок и оборудования |
+| `technician` | Просмотр и обновление статуса заявок |
+| `client` | Создание и просмотр своих заявок |
+"""
+
+TAGS_METADATA = [
+    {"name": "auth", "description": "Регистрация, вход, текущий пользователь"},
+    {"name": "users", "description": "Управление пользователями (admin)"},
+    {"name": "equipment", "description": "Справочник оборудования"},
+    {"name": "repair_requests", "description": "Заявки на ремонт"},
+]
+
 app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
+    description=DESCRIPTION,
+    openapi_tags=TAGS_METADATA,
     lifespan=lifespan,
 )
 

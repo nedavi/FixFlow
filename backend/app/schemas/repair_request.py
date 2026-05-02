@@ -13,6 +13,17 @@ class RepairRequestCreate(BaseModel):
     priority: RequestPriority = RequestPriority.medium
     equipment_id: int
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "title": "Принтер не печатает",
+                "description": "Принтер выдаёт ошибку замятия бумаги при печати",
+                "priority": "high",
+                "equipment_id": 1,
+            }
+        }
+    }
+
 
 class RepairRequestUpdate(BaseModel):
     title: str | None = None

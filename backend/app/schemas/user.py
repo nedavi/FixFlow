@@ -12,6 +12,18 @@ class UserCreate(BaseModel):
     full_name: str
     role: UserRole = UserRole.client
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "email": "ivan@example.com",
+                "username": "ivan_tech",
+                "password": "secret123",
+                "full_name": "Иван Иванов",
+                "role": "technician",
+            }
+        }
+    }
+
     @field_validator("username")
     @classmethod
     def username_alphanumeric(cls, v: str) -> str:

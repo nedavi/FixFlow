@@ -13,6 +13,19 @@ class EquipmentCreate(BaseModel):
     status: EquipmentStatus = EquipmentStatus.working
     description: str | None = None
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "name": "Принтер HP LaserJet Pro",
+                "serial_number": "HP-2024-001",
+                "equipment_type": "Принтер",
+                "location": "Офис 101",
+                "status": "working",
+                "description": "Лазерный принтер формата A4",
+            }
+        }
+    }
+
 
 class EquipmentUpdate(BaseModel):
     name: str | None = None
