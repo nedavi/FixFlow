@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -17,7 +17,39 @@ def list_requests(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 
 @router.post("/", response_model=RepairRequestResponse, status_code=201)
-def create_new_request(data: RepairRequestCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_new_request(
+    data: RepairRequestCreate = Body(openapi_examples={
+        "high_priority": {
+            "summary": "Срочная поломка",
+            "value": {
+                "title": "Принтер не печатает",
+                "description": "Принтер HP выдаёт ошибку замятия бумаги",
+                "priority": "high",
+                "equipment_id": 1,
+            },
+        },
+        "planned": {
+            "summary": "Плановое обслуживание",
+            "value": {
+                "title": "Замена картриджа",
+                "description": "Заканчивается тонер",
+                "priority": "low",
+                "equipment_id": 2,
+            },
+        },
+        "critical": {
+            "summary": "Критическая авария",
+            "value": {
+                "title": "Сервер не отвечает",
+                "description": "Сервер перестал отвечать после обновления ПО",
+                "priority": "critical",
+                "equipment_id": 3,
+            },
+        },
+    }),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     if not get_equipment(db, data.equipment_id):
         raise HTTPException(status_code=404, detail="Equipment not found")
     return create_request(db, data, current_user.id)
@@ -36,7 +68,20 @@ def get_request_by_id(request_id: int, db: Session = Depends(get_db), current_us
 @router.patch("/{request_id}", response_model=RepairRequestResponse)
 def update_request_by_id(
     request_id: int,
-    data: RepairRequestUpdate,
+    data: RepairRequestUpdate = Body(openapi_examples={
+        "assign": {
+            "summary": "Назначить техника",
+            "value": {"assigned_to_id": 2, "status": "in_progress"},
+        },
+        "complete": {
+            "summary": "Завершить заявку",
+            "value": {"status": "completed", "notes": "Проблема устранена, оборудование работает"},
+        },
+        "cancel": {
+            "summary": "Отменить заявку",
+            "value": {"status": "cancelled"},
+        },
+    }),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

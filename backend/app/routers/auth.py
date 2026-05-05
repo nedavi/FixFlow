@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.auth import Token
 from app.schemas.user import UserCreate, UserResponse
 from app.services.auth import create_access_token, verify_password
@@ -24,12 +24,25 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
-def register(data: UserCreate, db: Session = Depends(get_db)):
+def register(
+    data: UserCreate = Body(openapi_examples={
+        "client": {
+            "summary": "Клиент",
+            "value": {
+                "email": "client@example.com",
+                "username": "new_client",
+                "password": "secret123",
+                "full_name": "Пётр Сидоров",
+                "role": "client",
+            },
+        },
+    }),
+    db: Session = Depends(get_db),
+):
     if get_user_by_email(db, data.email):
         raise HTTPException(status_code=400, detail="Email already registered")
     if get_user_by_username(db, data.username):
         raise HTTPException(status_code=400, detail="Username already taken")
-    from app.models.user import UserRole
     data.role = UserRole.client
     return create_user(db, data)
 
