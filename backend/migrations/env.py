@@ -15,7 +15,7 @@ if database_url:
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     config.set_main_option("sqlalchemy.url", database_url)
 
-import app.models  # noqa: F401, E402
+import app.models  # noqa: E402
 from app.database import Base  # noqa: E402
 
 target_metadata = Base.metadata

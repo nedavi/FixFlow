@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.repair_request import RequestPriority, RequestStatus
 from app.schemas.equipment import EquipmentResponse
@@ -8,8 +8,8 @@ from app.schemas.user import UserResponse
 
 
 class RepairRequestCreate(BaseModel):
-    title: str
-    description: str | None = None
+    title: str = Field(min_length=3, max_length=200)
+    description: str | None = Field(default=None, max_length=1000)
     priority: RequestPriority = RequestPriority.medium
     equipment_id: int
 
@@ -26,12 +26,12 @@ class RepairRequestCreate(BaseModel):
 
 
 class RepairRequestUpdate(BaseModel):
-    title: str | None = None
-    description: str | None = None
+    title: str | None = Field(default=None, min_length=3, max_length=200)
+    description: str | None = Field(default=None, max_length=1000)
     priority: RequestPriority | None = None
     status: RequestStatus | None = None
     assigned_to_id: int | None = None
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=2000)
 
 
 class RepairRequestResponse(BaseModel):

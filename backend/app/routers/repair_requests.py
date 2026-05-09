@@ -7,6 +7,7 @@ from app.models.user import User, UserRole
 from app.schemas.repair_request import RepairRequestCreate, RepairRequestResponse, RepairRequestUpdate
 from app.services.equipment import get_equipment
 from app.services.repair_requests import create_request, delete_request, get_request, get_requests, update_request
+from app.services.users import get_user
 
 router = APIRouter(prefix="/api/requests", tags=["repair_requests"])
 
@@ -93,15 +94,20 @@ def update_request_by_id(
         if req.created_by_id != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
         allowed_fields = {"description", "title"}
-        if any(k not in allowed_fields for k in data.model_dump(exclude_none=True)):
+        if any(k not in allowed_fields for k in data.model_dump(exclude_unset=True)):
             raise HTTPException(status_code=403, detail="Clients can only edit title/description")
 
     if current_user.role == UserRole.technician:
         if req.assigned_to_id != current_user.id:
             raise HTTPException(status_code=403, detail="Not assigned to you")
         allowed_fields = {"status", "notes"}
-        if any(k not in allowed_fields for k in data.model_dump(exclude_none=True)):
+        if any(k not in allowed_fields for k in data.model_dump(exclude_unset=True)):
             raise HTTPException(status_code=403, detail="Technicians can only update status/notes")
+
+    if data.assigned_to_id is not None:
+        assignee = get_user(db, data.assigned_to_id)
+        if not assignee or assignee.role != UserRole.technician:
+            raise HTTPException(status_code=400, detail="Assigned user must be a technician")
 
     return update_request(db, req, data, current_user)
 

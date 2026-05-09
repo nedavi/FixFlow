@@ -43,10 +43,13 @@ def create_request(db: Session, data: RepairRequestCreate, created_by_id: int) -
 
 
 def update_request(db: Session, request: RepairRequest, data: RepairRequestUpdate, current_user: User) -> RepairRequest:
-    update_data = data.model_dump(exclude_none=True)
+    update_data = data.model_dump(exclude_unset=True)
 
-    if "status" in update_data and update_data["status"] == RequestStatus.completed:
-        request.completed_at = datetime.utcnow()
+    if "status" in update_data:
+        if update_data["status"] == RequestStatus.completed:
+            request.completed_at = datetime.utcnow()
+        else:
+            request.completed_at = None
 
     for field, value in update_data.items():
         setattr(request, field, value)

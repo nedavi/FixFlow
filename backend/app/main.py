@@ -1,12 +1,10 @@
-import signal
-import sys
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.database import SessionLocal, engine
+from app.database import Base, SessionLocal, engine
 from app.logging_config import get_logger, setup_logging
 from app.middleware import RequestIDMiddleware
 from app.routers import auth, equipment, repair_requests, users
@@ -17,10 +15,8 @@ logger = get_logger("fixflow.startup")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    import app.models  # noqa: F401 — register all models with Base
-    from app.database import Base
+    import app.models  # noqa: F401
     Base.metadata.create_all(bind=engine)
-
     db = SessionLocal()
     try:
         from app.services.users import seed_demo_data
@@ -83,15 +79,6 @@ app.include_router(repair_requests.router)
 @app.get("/health")
 def health():
     return {"status": "ok", "service": settings.app_name, "environment": settings.environment}
-
-
-def _handle_signal(sig, frame):
-    logger.info("signal_received", signal=sig)
-    sys.exit(0)
-
-
-signal.signal(signal.SIGTERM, _handle_signal)
-signal.signal(signal.SIGINT, _handle_signal)
 
 
 if __name__ == "__main__":

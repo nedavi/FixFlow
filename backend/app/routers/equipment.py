@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_admin_or_manager
+from app.models.repair_request import RepairRequest
 from app.schemas.equipment import EquipmentCreate, EquipmentResponse, EquipmentUpdate
 from app.services.equipment import (
     create_equipment,
@@ -100,4 +101,6 @@ def delete_equipment_by_id(equipment_id: int, db: Session = Depends(get_db), _=D
     equipment = get_equipment(db, equipment_id)
     if not equipment:
         raise HTTPException(status_code=404, detail="Equipment not found")
+    if db.query(RepairRequest).filter(RepairRequest.equipment_id == equipment_id).first():
+        raise HTTPException(status_code=400, detail="Cannot delete equipment with existing repair requests")
     delete_equipment(db, equipment)
