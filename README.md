@@ -14,16 +14,37 @@
 ## Архитектура (MVC)
 
 ```
-backend/app/
-├── models/       # M — SQLAlchemy-модели (User, Equipment, RepairRequest)
-├── schemas/      # V — Pydantic-схемы (представление данных)
-├── services/     # C — бизнес-логика
-├── routers/      # HTTP-маршруты (View/Controller boundary)
-├── config.py     # 12-factor: вся конфигурация из env vars
-├── database.py   # Подключение к БД
-├── logging_config.py  # Структурное JSON-логирование в stdout
-├── middleware.py # Request-ID трассировка
-└── main.py       # Точка входа, graceful shutdown
+backend/
+├── app/
+│   ├── models/               # M — модели SQLAlchemy
+│   │   ├── user.py
+│   │   ├── equipment.py
+│   │   └── repair_request.py
+│   ├── schemas/              # V — представление данных (Pydantic)
+│   │   ├── auth.py
+│   │   ├── user.py
+│   │   ├── equipment.py
+│   │   └── repair_request.py
+│   ├── services/             # C — бизнес-логика
+│   │   ├── auth.py
+│   │   ├── users.py
+│   │   ├── equipment.py
+│   │   └── repair_requests.py
+│   ├── routers/              # C — маршруты (контроллеры)
+│   │   ├── auth.py
+│   │   ├── users.py
+│   │   ├── equipment.py
+│   │   └── repair_requests.py
+│   ├── config.py             # конфигурация (env vars)
+│   ├── database.py           # подключение к СУБД
+│   ├── dependencies.py       # зависимости FastAPI (auth, roles)
+│   ├── logging_config.py     # структурное JSON-логирование
+│   ├── middleware.py         # Request-ID трассировка
+│   └── main.py               # точка входа приложения
+├── migrations/               # миграции Alembic
+├── tests/                    # модульные и фаззинг-тесты
+├── Dockerfile
+└── requirements.txt
 ```
 
 ## Роли пользователей
@@ -68,12 +89,25 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
+alembic upgrade head
 uvicorn app.main:app --reload
 
 cd frontend
 npm install
 npm run dev
 ```
+
+## Миграции
+
+Схема БД управляется через Alembic:
+
+```bash
+alembic upgrade head          # применить миграции
+alembic revision --autogenerate -m "name"  # создать новую миграцию
+alembic downgrade -1          # откатить последнюю
+```
+
+При деплое Railway автоматически запускает `alembic upgrade head` перед стартом сервера.
 
 ## Переменные окружения
 
@@ -112,16 +146,34 @@ FixFlow/
 │   │   ├── schemas/
 │   │   ├── services/
 │   │   ├── routers/
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── dependencies.py
+│   │   ├── logging_config.py
+│   │   ├── middleware.py
 │   │   └── main.py
 │   ├── migrations/
+│   │   └── versions/
+│   │       └── 67c1241e63e2_init.py
 │   ├── tests/
+│   ├── alembic.ini
+│   ├── pyproject.toml
+│   ├── railway.toml
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── store/
+│   │   └── types/
 │   ├── Dockerfile
-│   └── nginx.conf
+│   ├── nginx.conf
+│   ├── railway.toml
+│   └── package.json
 ├── .github/workflows/
+│   └── ci.yml
 ├── docker-compose.yml
 └── .env.example
 ```

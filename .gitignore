@@ -9,9 +9,6 @@ venv/
 *.db
 *.db-journal
 
-# Alembic
-migrations/versions/*.py
-!migrations/versions/.gitkeep
 
 # Env
 .env
@@ -39,4 +36,4 @@ Thumbs.db
 # Local tools
 .claude/
 backend/.ruff_cache/
-working_conditions.md
+backend/.hypothesis/

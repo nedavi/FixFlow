@@ -15,7 +15,7 @@ logger = get_logger("fixflow.startup")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    import app.models  # noqa: F401
+    import app.models
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
